@@ -1,0 +1,17 @@
+#root {
+	height: 100%;
+	width: 100%;
+	margin: 0 auto;
+	text-align: center;
+}
+
+header {
+	height: var(--header-height);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.gameButton {
+	margin-right: .5rem;
+}

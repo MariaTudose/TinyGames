@@ -1,0 +1,52 @@
+.tictactoe {
+	box-sizing: border-box;
+	padding: 2rem;
+	padding-top: 10rem;
+	height: calc(100% - var(--header-height));
+	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	align-content: center;
+	flex-direction: column;
+
+	&.winner {
+		animation-name: rainbow;
+		animation-duration: 4s;
+		animation-iteration-count: infinite;
+	}
+
+	input {
+		width: 2rem;
+		height: 2rem;
+		margin: 0.5rem;
+		cursor: pointer;
+		text-align: center;
+		outline: none;
+	}
+
+	button {
+		margin-top: 1rem;
+	}
+}
+
+.header {
+	visibility: hidden;
+	color: black;
+
+	&.O,
+	&.X {
+		visibility: visible;
+	}
+}
+
+@keyframes rainbow {
+	0%   {background-color: #ffadad}
+	14%  {background-color:  #ffd6a5}
+	28%  {background-color: #fdffb6;}
+	42%  {background-color: #caffbf}
+	56%  {background-color: #9bf6ff}
+	70%  {background-color: #a0c4ff;}
+	84%  {background-color: #bdb2ff}
+	100%  {background-color: #ffc6ff}
+}

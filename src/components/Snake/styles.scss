@@ -1,0 +1,95 @@
+.snakeContainer {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+}
+
+.mainContainer {
+	display: flex;
+	position: relative;
+}
+
+.aside {
+	position: relative;
+	width: fit-content;
+	h2 {
+		margin-bottom: 1rem;
+		font-size: 1.25rem;
+	}
+
+	.score {
+		display: flex;
+		justify-content: space-around;
+	}
+
+	.name {
+		position: absolute;
+		top: -3.8rem;
+		left: -0.5rem;
+		visibility: hidden;
+		padding: 1rem;
+		background-color: #3a3a3a;
+		border-radius: 1rem;
+		h3 {
+			margin-bottom: 1rem;
+			font-size: 1.125rem;
+			text-wrap: nowrap;
+		}
+
+		input {
+			width: 100px;
+			margin-top: 0.25rem;
+		}
+
+		&.visible {
+			visibility: visible;
+		}
+	}
+
+	td {
+		padding-right: 0.5rem;
+	}
+}
+
+.gameGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
+	grid-auto-rows: var(--snake-grid-size);
+	width: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
+	height: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
+	border: 1px solid pink;
+}
+
+.snakeHeader {
+	visibility: hidden;
+	margin: 2rem 1rem;
+	color: white;
+	&.true {
+		visibility: visible;
+	}
+}
+
+.snake {
+	background-color: pink;
+	&.snake0 {
+		transform: rotate(90deg);
+		background-image: url(../../static/snek.png);
+		background-size: contain;
+	}
+}
+
+.food {
+	background-image: url(../../static/apple.svg);
+	background-size: contain;
+}
+
+.goldenFood {
+	background-image: url(../../static/goldenApple.svg);
+	background-size: contain;
+	&.hidden {
+		visibility: hidden;
+	}
+}
