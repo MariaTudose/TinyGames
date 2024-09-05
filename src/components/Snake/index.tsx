@@ -11,6 +11,10 @@ enum Direction {
 	ArrowDown = 'ArrowDown',
 	ArrowLeft = 'ArrowLeft',
 	ArrowRight = 'ArrowRight',
+	W = 'w',
+	A = 'a',
+	S = 's',
+	D = 'd',
 }
 
 const opposites: Record<Direction, string> = {
@@ -18,9 +22,13 @@ const opposites: Record<Direction, string> = {
 	[Direction.ArrowDown]: 'ArrowUp',
 	[Direction.ArrowLeft]: 'ArrowRight',
 	[Direction.ArrowRight]: 'ArrowLeft',
+	[Direction.W]: 's',
+	[Direction.A]: 'd',
+	[Direction.S]: 'w',
+	[Direction.D]: 'a',
 };
 
-const verticalDir = ['ArrowDown', 'ArrowUp'];
+const verticalDir = ['ArrowDown', 'ArrowUp', 'w', 's'];
 const startingSpeed = 300;
 const scale = (Math.log(50) - Math.log(startingSpeed)) / (40 - 1);
 
@@ -38,7 +46,7 @@ const Snake = () => {
 
 	useEffect(() => {
 		// Speed up snake
-		setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50 );
+		setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50);
 
 		// Spawn golden apple every 5 apples
 		if (snakeLength > 1 && (snakeLength - 1) % 5 === 0) {
@@ -66,30 +74,12 @@ const Snake = () => {
 		}
 	}, [appleCoords, coords, goldenCoords]);
 
-	const handleKeyDown = (e: KeyboardEvent) => {
-		const { key } = e;
-		if (gameStarted && Object.values(Direction).includes(key as Direction)) e.preventDefault();
-		if (gameStarted && opposites[dir] !== key) {
-			setDir(e.key as Direction);
-			handleMove(e.key);
-		}
-	};
-
-	// Listen to arrow keys
-	useEffect(() => {
-		window.addEventListener('keydown', handleKeyDown);
-
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [gameStarted, dir]);
-
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
 		if (coords.slice(0, -1).find(([y, x]) => y === yPos && x === xPos)) {
 			console.log('coords', coords, xPos, yPos);
 			setGameStarted(false);
 			setGameOver(true);
+			clearInterval(intervalRef.current);
 			return true;
 		}
 	}, []);
@@ -107,21 +97,47 @@ const Snake = () => {
 
 	const handleMove = useCallback(
 		(key: string) => {
-			if (key === 'ArrowLeft') {
+			if (key === 'ArrowLeft' || key === 'a') {
 				setCoords((coords) => getNewCoords(coords, 0, -1));
 			}
-			if (key === 'ArrowRight') {
+			if (key === 'ArrowRight' || key === 'd') {
 				setCoords((coords) => getNewCoords(coords, 0, 1));
 			}
-			if (key === 'ArrowDown') {
+			if (key === 'ArrowDown' || key === 's') {
 				setCoords((coords) => getNewCoords(coords, 1, 0));
 			}
-			if (key === 'ArrowUp') {
+			if (key === 'ArrowUp' || key === 'w') {
 				setCoords((coords) => getNewCoords(coords, -1, 0));
 			}
 		},
 		[getNewCoords]
 	);
+
+	const handleKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			const { key } = e;
+			const isArrowKey = Object.values(Direction).includes(key as Direction);
+			console.log('isArrowKey', isArrowKey, key);
+			if (!gameStarted && !gameOver && key === ' ') startGame();
+			if (gameStarted && isArrowKey) {
+				e.preventDefault();
+				if (opposites[dir] !== key) {
+					setDir(e.key as Direction);
+					handleMove(e.key);
+				}
+			}
+		},
+		[dir, gameOver, gameStarted, handleMove]
+	);
+
+	// Listen to arrow keys
+	useEffect(() => {
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [gameStarted, handleKeyDown]);
 
 	// Game ticks
 	useEffect(() => {
@@ -135,8 +151,8 @@ const Snake = () => {
 		setScore(0);
 		setSnakeLength(1);
 		setGameOver(false);
-		setSnakeSpeed(400);
 		setGameStarted(true);
+		setSnakeSpeed(startingSpeed);
 		setCoords([getRandomCoords()]);
 	};
 
@@ -159,11 +175,6 @@ const Snake = () => {
 								}}
 							></div>
 						);
-					} else {
-						console.log('not possible!!', coords, snakeLength);
-						setGameStarted(false);
-						setGameOver(true);
-						return <div></div>;
 					}
 				})}
 				<div className="food" style={{ gridArea: `${appleCoords[0]} / ${appleCoords[1]}` }}></div>
