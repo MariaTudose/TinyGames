@@ -21,6 +21,8 @@ const opposites: Record<Direction, string> = {
 };
 
 const verticalDir = ['ArrowDown', 'ArrowUp'];
+const startingSpeed = 300;
+const scale = (Math.log(50) - Math.log(startingSpeed)) / (40 - 1);
 
 const Snake = () => {
 	const intervalRef = useRef<number>();
@@ -32,13 +34,11 @@ const Snake = () => {
 	const [snakeLength, setSnakeLength] = useState(1);
 	const [score, setScore] = useState(0);
 	const [coords, setCoords] = useState([getRandomCoords()]);
-	const [snakeSpeed, setSnakeSpeed] = useState(400);
+	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
 
 	useEffect(() => {
-		// Speed up game every 2 apples
-		if (snakeLength % 2 === 0) {
-			setSnakeSpeed((snakeSpeed) => snakeSpeed * 0.9);
-		}
+		// Speed up snake
+		setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50 );
 
 		// Spawn golden apple every 5 apples
 		if (snakeLength > 1 && (snakeLength - 1) % 5 === 0) {
