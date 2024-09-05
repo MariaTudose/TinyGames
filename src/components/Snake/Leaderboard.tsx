@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 type Score = {
@@ -6,20 +6,26 @@ type Score = {
 	score: number;
 };
 
-interface LeaderboardsProps {
+interface LeaderboardProps {
 	setGameOver: (gameOver: boolean) => void;
 	gameOver: boolean;
 	score: number;
 }
 
-const Leaderboards = ({ setGameOver, gameOver, score }: LeaderboardsProps) => {
+const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 	const [name, setName] = useState('');
+	const inputRef = useRef<HTMLInputElement>(null);
 	const { value, setItem } = useLocalStorage<Score[]>('scores', []);
 	const [leaderBoard, setLeaderBoard] = useState<Score[]>([]);
 
+	// Populate leaderboard
 	useEffect(() => {
 		if (value) setLeaderBoard(value);
 	}, [value]);
+
+	useEffect(() => {
+		if (gameOver && inputRef.current) inputRef.current.focus();
+	}, [gameOver]);
 
 	const newHighScore = () => Math.min(...leaderBoard.map((score) => score.score)) < score;
 
@@ -38,7 +44,7 @@ const Leaderboards = ({ setGameOver, gameOver, score }: LeaderboardsProps) => {
 
 	return (
 		<div className="aside">
-			<h2>Leaderboards</h2>
+			<h2>Leaderboard</h2>
 			<table>
 				<tbody>
 					{leaderBoard
@@ -57,6 +63,7 @@ const Leaderboards = ({ setGameOver, gameOver, score }: LeaderboardsProps) => {
 					Name:
 					<input
 						autoComplete="off"
+						ref={inputRef}
 						id="name"
 						name="name"
 						type="text"
@@ -69,4 +76,4 @@ const Leaderboards = ({ setGameOver, gameOver, score }: LeaderboardsProps) => {
 	);
 };
 
-export default Leaderboards;
+export default Leaderboard;

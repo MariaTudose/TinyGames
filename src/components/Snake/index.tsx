@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getFoodCoords, modN, getRandomCoords } from './utils';
-import Leaderboards from './Leaderboards';
+import Leaderboards from './Leaderboard';
 
 import './styles.scss';
 
@@ -137,7 +137,7 @@ const Snake = () => {
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [gameStarted, handleKeyDown]);
+	}, [handleKeyDown]);
 
 	// Game ticks
 	useEffect(() => {
