@@ -28,7 +28,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 						setLeaderBoard(
 							Object.values(data)
 								.sort((a, b) => b.score - a.score)
-								.slice(0, 10)
+								.slice(0, 15)
 						);
 				} else {
 					console.log('No data available');
@@ -43,12 +43,12 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 		if (gameOver && inputRef.current) inputRef.current.focus();
 	}, [gameOver]);
 
-	const newHighScore = () => Math.min(...leaderBoard.map((score) => score.score)) < score;
+	const newHighScore = () => leaderBoard.length < 15 || Math.min(...leaderBoard.map((score) => score.score)) < score;
 
 	const enterName = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setGameOver(false);
-		if (leaderBoard.length < 10 || newHighScore()) {
+		if (newHighScore()) {
 			const newScore = { name, score };
 			const leaderboardRef = ref(getDatabase(), 'leaderboard');
 			const newScoreRef = push(leaderboardRef);
