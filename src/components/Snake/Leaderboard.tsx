@@ -64,12 +64,14 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 			<h2>Leaderboard</h2>
 			<table>
 				<tbody>
-					{leaderBoard.map((score, i) => (
-						<tr key={i}>
-							<td>{score.name}</td>
-							<td>{score.score}</td>
-						</tr>
-					))}
+					{leaderBoard
+						.sort((a, b) => b.score - a.score)
+						.map((score, i) => (
+							<tr key={i}>
+								<td>{score.name}</td>
+								<td>{score.score}</td>
+							</tr>
+						))}
 				</tbody>
 			</table>
 			<form className={`name ${gameOver && newHighScore() && 'visible'}`} onSubmit={enterName}>
