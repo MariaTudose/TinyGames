@@ -50,10 +50,13 @@ const Snake = () => {
 
 		// Spawn golden apple every 5 apples
 		if (snakeLength > 1 && (snakeLength - 1) % 5 === 0) {
-			setGoldenCoords(getFoodCoords(coords));
+			const [foodY, foodX] = getFoodCoords(coords);
+			const [snakeY, snakeX] = coords[0];
+			const time = Math.max(1000, 0.9 * snakeSpeed * (Math.abs(snakeY - foodY) + Math.abs(snakeX - foodX)));
+			setGoldenCoords([foodY, foodX]);
 			setTimeout(() => {
 				setGoldenCoords([0, 0]);
-			}, 2000);
+			}, time);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [snakeLength]);
@@ -117,7 +120,6 @@ const Snake = () => {
 		(e: KeyboardEvent) => {
 			const { key } = e;
 			const isArrowKey = Object.values(Direction).includes(key as Direction);
-			console.log('isArrowKey', isArrowKey, key);
 			if (!gameStarted && !gameOver && key === ' ') startGame();
 			if (gameStarted && isArrowKey) {
 				e.preventDefault();

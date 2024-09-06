@@ -57,7 +57,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 						))}
 				</tbody>
 			</table>
-			<form className={`name ${gameOver && 'visible'}`} onSubmit={enterName}>
+			<form className={`name ${gameOver && newHighScore() && 'visible'}`} onSubmit={enterName}>
 				<h3>New high score!</h3>
 				<label>
 					Name:
