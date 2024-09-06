@@ -24,7 +24,12 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 			.then((snapshot) => {
 				if (snapshot.exists()) {
 					const data = snapshot.toJSON();
-					if (data) setLeaderBoard(Object.values(data));
+					if (data)
+						setLeaderBoard(
+							Object.values(data)
+								.sort((a, b) => b.score - a.score)
+								.slice(0, 10)
+						);
 				} else {
 					console.log('No data available');
 				}
@@ -59,15 +64,12 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 			<h2>Leaderboard</h2>
 			<table>
 				<tbody>
-					{leaderBoard
-						.sort((a, b) => b.score - a.score)
-						.slice(0, 10)
-						.map((score, i) => (
-							<tr key={i}>
-								<td>{score.name}</td>
-								<td>{score.score}</td>
-							</tr>
-						))}
+					{leaderBoard.map((score, i) => (
+						<tr key={i}>
+							<td>{score.name}</td>
+							<td>{score.score}</td>
+						</tr>
+					))}
 				</tbody>
 			</table>
 			<form className={`name ${gameOver && newHighScore() && 'visible'}`} onSubmit={enterName}>
@@ -82,6 +84,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 						type="text"
 						onInput={(e) => setName((e.target as HTMLInputElement).value)}
 						value={name}
+						maxLength={10}
 					/>
 				</label>
 			</form>
