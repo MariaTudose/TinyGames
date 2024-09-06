@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { getDatabase, ref, child, get, push, set } from 'firebase/database';
 
 type Score = {
 	name: string;
@@ -15,13 +15,24 @@ interface LeaderboardProps {
 const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 	const [name, setName] = useState('');
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { value, setItem } = useLocalStorage<Score[]>('scores', []);
 	const [leaderBoard, setLeaderBoard] = useState<Score[]>([]);
 
 	// Populate leaderboard
 	useEffect(() => {
-		if (value) setLeaderBoard(value);
-	}, [value]);
+		const dbRef = ref(getDatabase());
+		get(child(dbRef, 'leaderboard'))
+			.then((snapshot) => {
+				if (snapshot.exists()) {
+					const data = snapshot.toJSON();
+					if (data) setLeaderBoard(Object.values(data));
+				} else {
+					console.log('No data available');
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}, []);
 
 	useEffect(() => {
 		if (gameOver && inputRef.current) inputRef.current.focus();
@@ -33,11 +44,12 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 		e.preventDefault();
 		setGameOver(false);
 		if (leaderBoard.length < 10 || newHighScore()) {
-			setLeaderBoard((leaderBoard) => {
-				const newLeaderBoard = [{ name, score }, ...leaderBoard];
-				if (newLeaderBoard.length > 10) newLeaderBoard.sort((a, b) => b.score - a.score).pop();
-				setItem(newLeaderBoard);
-				return newLeaderBoard;
+			const newScore = { name, score };
+			const leaderboardRef = ref(getDatabase(), 'leaderboard');
+			const newScoreRef = push(leaderboardRef);
+			set(newScoreRef, newScore).then(() => {
+				console.log('Leaderboard updated');
+				setLeaderBoard((leaderBoard) => [newScore, ...leaderBoard]);
 			});
 		}
 	};
@@ -49,6 +61,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 				<tbody>
 					{leaderBoard
 						.sort((a, b) => b.score - a.score)
+						.slice(0, 10)
 						.map((score, i) => (
 							<tr key={i}>
 								<td>{score.name}</td>

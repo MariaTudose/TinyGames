@@ -144,7 +144,7 @@ const Snake = () => {
 	// Game ticks
 	useEffect(() => {
 		if (gameStarted) {
-			intervalRef.current = setInterval(() => handleMove(dir), snakeSpeed);
+			intervalRef.current = window.setInterval(() => handleMove(dir), snakeSpeed);
 			return () => clearInterval(intervalRef.current);
 		}
 	}, [handleMove, gameStarted, snakeSpeed, dir]);
