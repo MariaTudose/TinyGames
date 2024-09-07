@@ -17,6 +17,16 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [leaderBoard, setLeaderBoard] = useState<Score[]>([]);
 
+	const filterScores = (leaderBoard: Score[]) => {
+		const newLeaderBoard = Object.values(
+			leaderBoard.reduce<Record<string, Score>>((res, score) => {
+				res[score.name] = res[score.name] && res[score.name].score > score.score ? res[score.name] : score;
+				return res;
+			}, {})
+		);
+		setLeaderBoard(newLeaderBoard.sort((a, b) => b.score - a.score).slice(0, 15));
+	};
+
 	// Populate leaderboard
 	useEffect(() => {
 		const dbRef = ref(getDatabase());
@@ -24,12 +34,9 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 			.then((snapshot) => {
 				if (snapshot.exists()) {
 					const data = snapshot.toJSON();
-					if (data)
-						setLeaderBoard(
-							Object.values(data)
-								.sort((a, b) => b.score - a.score)
-								.slice(0, 15)
-						);
+					if (data) {
+						filterScores(Object.values(data));
+					}
 				} else {
 					console.log('No data available');
 				}
@@ -49,12 +56,11 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 		e.preventDefault();
 		setGameOver(false);
 		if (newHighScore()) {
-			const newScore = { name, score };
+			const newScore = { name, score, timeStamp: new Date().toISOString() };
 			const leaderboardRef = ref(getDatabase(), 'leaderboard');
 			const newScoreRef = push(leaderboardRef);
 			set(newScoreRef, newScore).then(() => {
-				console.log('Leaderboard updated');
-				setLeaderBoard((leaderBoard) => [newScore, ...leaderBoard]);
+				filterScores([newScore, ...leaderBoard]);
 			});
 		}
 	};
