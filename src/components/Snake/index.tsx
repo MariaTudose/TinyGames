@@ -105,7 +105,7 @@ const Snake = () => {
 			const yPos = modN(coords[0][0] + yDir);
 			const xPos = modN(coords[0][1] + xDir);
 			if (!checkCollisions(coords, yPos, xPos)) {
-				return [[yPos, xPos], ...coords.slice(0, snakeLength)];
+				return [[yPos, xPos], ...coords.slice(0, snakeLength - 1)];
 			} else return coords;
 		},
 		[checkCollisions, snakeLength]
@@ -169,9 +169,10 @@ const Snake = () => {
 		setScore(0);
 		setSnakeLength(1);
 		setGameOver(false);
+		setCoords([[8, 8]]);
 		setGameStarted(true);
+		setDir(Direction.ArrowRight);
 		setSnakeSpeed(startingSpeed);
-		setCoords([getRandomCoords()]);
 	};
 
 	return (
@@ -184,16 +185,42 @@ const Snake = () => {
 						if (coords.length > snakeL) {
 							const newYPos = coords[snakeL][0];
 							const newXPos = coords[snakeL][1];
+
+							let hasTopNeighbor = false;
+							let hasLeftNeighbor = false;
+							let hasBottomNeighbor = false;
+							let hasRightNeighbor = false;
+
+							// TODO clean up code
+							if (snakeL !== 0) {
+								const prevY = coords[snakeL - 1][0];
+								const prevX = coords[snakeL - 1][1];
+								hasTopNeighbor = prevY === newYPos - 1 && prevX === newXPos;
+								hasLeftNeighbor = prevY === newYPos && prevX === newXPos - 1;
+								hasBottomNeighbor = prevY === newYPos + 1 && prevX === newXPos;
+								hasRightNeighbor = prevY === newYPos && prevX === newXPos + 1;
+							}
+							if (coords.length > snakeL + 1) {
+								const nextY = coords[snakeL + 1][0];
+								const nextX = coords[snakeL + 1][1];
+								hasTopNeighbor = hasTopNeighbor || (nextY === newYPos - 1 && nextX === newXPos);
+								hasLeftNeighbor = hasLeftNeighbor || (nextY === newYPos && nextX === newXPos - 1);
+								hasBottomNeighbor = hasBottomNeighbor || (nextY === newYPos + 1 && nextX === newXPos);
+								hasRightNeighbor = hasRightNeighbor || (nextY === newYPos && nextX === newXPos + 1);
+							}
 							return (
 								<div
 									key={snakeL}
-									className={`snake snake${snakeL}`}
+									className={`snake snake${snakeL} ${verticalDir.includes(dir) ? 'rotate' : ''}`}
 									style={{
+										borderLeft: hasLeftNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
+										borderTop: hasTopNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
+										borderRight: hasRightNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
+										borderBottom: hasBottomNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
 										gridArea: `${newYPos} / ${newXPos}`,
-										transform: `rotate(${verticalDir.includes(dir) ? 0 : 90}deg)`,
 										backgroundColor: selectedColor,
 									}}
-								></div>
+								/>
 							);
 						}
 					})}
@@ -205,7 +232,12 @@ const Snake = () => {
 				</div>
 				<div className="colorGrid">
 					{colors.map((color) => (
-						<div style={{ backgroundColor: color }} className={color} onClick={() => selectColor(color)}></div>
+						<div
+							key={color}
+							style={{ backgroundColor: color }}
+							className={color}
+							onClick={() => selectColor(color)}
+						></div>
 					))}
 				</div>
 			</div>

@@ -79,9 +79,24 @@
 
 .snake {
 	&.snake0 {
-		transform: rotate(90deg);
-		background-image: url(../../static/snek.svg);
-		background-size: contain;
+		position: relative;
+		
+		&::after {
+			content: "";
+			background-image: url(../../static/snek.svg);
+			background-size: contain;
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 13px;
+			height: 13px;
+			transform: rotate(90deg);
+			// TODO Fix eyes
+		}
+		
+		&.rotate::after {
+			transform: rotate(0deg);
+		}
 	}
 }
 
