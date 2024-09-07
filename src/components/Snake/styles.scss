@@ -61,6 +61,11 @@
 	width: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
 	height: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
 	border: 1px solid pink;
+	
+	&:focus,
+	&:focus-visible {
+    outline: none;
+	}
 }
 
 .snakeHeader {
@@ -73,10 +78,9 @@
 }
 
 .snake {
-	background-color: pink;
 	&.snake0 {
 		transform: rotate(90deg);
-		background-image: url(../../static/snek.png);
+		background-image: url(../../static/snek.svg);
 		background-size: contain;
 	}
 }
@@ -92,4 +96,16 @@
 	&.hidden {
 		visibility: hidden;
 	}
+}
+
+.colorGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
+	grid-auto-rows: var(--snake-grid-size);
+	width: var(--snake-grid-size);
+	height: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
+}
+
+.flexRow {
+	display: flex;
 }

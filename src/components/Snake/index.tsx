@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getFoodCoords, modN, getRandomCoords } from './utils';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Leaderboards from './Leaderboard';
 
 import './styles.scss';
@@ -31,6 +32,7 @@ const opposites: Record<Direction, string> = {
 const verticalDir = ['ArrowDown', 'ArrowUp', 'w', 's'];
 const startingSpeed = 300;
 const scale = (Math.log(50) - Math.log(startingSpeed)) / (40 - 1);
+const colors = ['#ca98f7', '#F19ED2', 'pink', '#ffa97e', '#F9F9E0', '#C0C78C', '#8ee5a1', '#8af0ff'];
 
 const Snake = () => {
 	const intervalRef = useRef<number>();
@@ -43,6 +45,17 @@ const Snake = () => {
 	const [score, setScore] = useState(0);
 	const [coords, setCoords] = useState([getRandomCoords()]);
 	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
+	const { value, setItem } = useLocalStorage('color', 'pink');
+	const [selectedColor, setSelectedColor] = useState('pink');
+
+	const selectColor = (color: string) => {
+		setItem(color);
+		setSelectedColor(color);
+	};
+
+	useEffect(() => {
+		if (value) setSelectedColor(value);
+	}, [value]);
 
 	useEffect(() => {
 		// Speed up snake
@@ -165,28 +178,36 @@ const Snake = () => {
 		<div className="snakeContainer">
 			<h1 className={`snakeHeader ${gameOver}`}>{`Game over`}</h1>
 			<h4 className="score">{`Score: ${score}`}</h4>
-			<div className="gameGrid" tabIndex={0}>
-				{Array.from(Array(snakeLength).keys()).map((snakeL) => {
-					if (coords.length > snakeL) {
-						const newYPos = coords[snakeL][0];
-						const newXPos = coords[snakeL][1];
-						return (
-							<div
-								key={snakeL}
-								className={`snake snake${snakeL}`}
-								style={{
-									gridArea: `${newYPos} / ${newXPos}`,
-									transform: `rotate(${verticalDir.includes(dir) ? 90 : 0}deg)`,
-								}}
-							></div>
-						);
-					}
-				})}
-				<div className="food" style={{ gridArea: `${appleCoords[0]} / ${appleCoords[1]}` }}></div>
-				<div
-					className={`goldenFood ${goldenCoords[0] === 0 && 'hidden'}`}
-					style={{ gridArea: `${goldenCoords[0]} / ${goldenCoords[1]}` }}
-				></div>
+			<div className="flexRow">
+				<div className="gameGrid" tabIndex={0} style={{ border: `1px solid ${selectedColor}` }}>
+					{Array.from(Array(snakeLength).keys()).map((snakeL) => {
+						if (coords.length > snakeL) {
+							const newYPos = coords[snakeL][0];
+							const newXPos = coords[snakeL][1];
+							return (
+								<div
+									key={snakeL}
+									className={`snake snake${snakeL}`}
+									style={{
+										gridArea: `${newYPos} / ${newXPos}`,
+										transform: `rotate(${verticalDir.includes(dir) ? 0 : 90}deg)`,
+										backgroundColor: selectedColor,
+									}}
+								></div>
+							);
+						}
+					})}
+					<div className="food" style={{ gridArea: `${appleCoords[0]} / ${appleCoords[1]}` }}></div>
+					<div
+						className={`goldenFood ${goldenCoords[0] === 0 && 'hidden'}`}
+						style={{ gridArea: `${goldenCoords[0]} / ${goldenCoords[1]}` }}
+					></div>
+				</div>
+				<div className="colorGrid">
+					{colors.map((color) => (
+						<div style={{ backgroundColor: color }} className={color} onClick={() => selectColor(color)}></div>
+					))}
+				</div>
 			</div>
 			<div>
 				<button className="startButton" onClick={startGame}>
