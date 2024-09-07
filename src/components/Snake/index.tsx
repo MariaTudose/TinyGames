@@ -52,7 +52,7 @@ const Snake = () => {
 		if (snakeLength > 1 && (snakeLength - 1) % 5 === 0) {
 			const [foodY, foodX] = getFoodCoords(coords);
 			const [snakeY, snakeX] = coords[0];
-			const time = Math.max(1000, 0.9 * snakeSpeed * (Math.abs(snakeY - foodY) + Math.abs(snakeX - foodX)));
+			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - foodY) + Math.abs(snakeX - foodX)));
 			setGoldenCoords([foodY, foodX]);
 			setTimeout(() => {
 				setGoldenCoords([0, 0]);
@@ -120,7 +120,10 @@ const Snake = () => {
 		(e: KeyboardEvent) => {
 			const { key } = e;
 			const isArrowKey = Object.values(Direction).includes(key as Direction);
-			if (!gameStarted && !gameOver && key === ' ') startGame();
+			if (!gameStarted && !gameOver && key === ' ') {
+				e.preventDefault();
+				startGame();
+			}
 			if (gameStarted && isArrowKey) {
 				e.preventDefault();
 				if (opposites[dir] !== key) {
