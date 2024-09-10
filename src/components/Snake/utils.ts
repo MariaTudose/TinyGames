@@ -15,3 +15,10 @@ export const getFoodCoords = (coords: number[][]) => {
 	} while (overlapsSnake(newCoords, coords) || tooClose(newCoords, coords));
 	return newCoords;
 };
+
+export const getRandomColor = () => {
+	const hue = 360 * Math.random();
+	const saturation = 30 + 40 * Math.random();
+	const lightness = 70 + 10 * Math.random();
+	return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};

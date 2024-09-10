@@ -113,6 +113,14 @@
 	}
 }
 
+.shroom {
+	background-image: url(../../static/shroom.svg);
+	background-size: contain;
+	&.hidden {
+		visibility: hidden;
+	}
+}
+
 .colorGrid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));

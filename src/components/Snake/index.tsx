@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getFoodCoords, modN, getRandomCoords } from './utils';
+import { getFoodCoords, modN, getRandomCoords, getRandomColor } from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Leaderboards from './Leaderboard';
 
@@ -41,12 +41,14 @@ const Snake = () => {
 	const [dir, setDir] = useState(Direction.ArrowRight);
 	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
 	const [goldenCoords, setGoldenCoords] = useState([0, 0]);
+	const [shroomCoords, setShroomCoords] = useState([0, 0]);
 	const [snakeLength, setSnakeLength] = useState(1);
 	const [score, setScore] = useState(0);
 	const [coords, setCoords] = useState([getRandomCoords()]);
 	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
 	const { value, setItem } = useLocalStorage('color', 'pink');
 	const [selectedColor, setSelectedColor] = useState('pink');
+	const [poisoned, setPoisoned] = useState(true);
 
 	const selectColor = (color: string) => {
 		setItem(color);
@@ -59,7 +61,20 @@ const Snake = () => {
 
 	useEffect(() => {
 		// Speed up snake
+		if (!poisoned) {
 		setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50);
+		}
+
+		// Spawn shroom every 12 apples
+		if (snakeLength > 1 && (snakeLength - 1) % 12 === 0) {
+			const [shroomY, shroomX] = getFoodCoords(coords);
+			const [snakeY, snakeX] = coords[0];
+			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - shroomY) + Math.abs(snakeX - shroomX)));
+			setShroomCoords([shroomY, shroomX]);
+			setTimeout(() => {
+				setShroomCoords([0, 0]);
+			}, time);
+		}
 
 		// Spawn golden apple every 5 apples
 		if (snakeLength > 1 && (snakeLength - 1) % 5 === 0) {
@@ -88,7 +103,24 @@ const Snake = () => {
 			setScore((score) => score + 5);
 			setGoldenCoords([0, 0]);
 		}
-	}, [appleCoords, coords, goldenCoords]);
+
+		if (yPos === shroomCoords[0] && xPos === shroomCoords[1]) {
+			const previousColor = selectedColor;
+			setPoisoned(true);
+			setShroomCoords([0, 0]);
+			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.3);
+
+			const interval = setInterval(() => {
+				setSelectedColor(getRandomColor());
+			}, snakeSpeed);
+
+			setTimeout(() => {
+				setPoisoned(false);
+				clearInterval(interval);
+				setSelectedColor(previousColor);
+			}, 5000);
+		}
+	}, [appleCoords, coords, goldenCoords, selectedColor, shroomCoords, snakeSpeed]);
 
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
 		if (coords.slice(0, -1).find(([y, x]) => y === yPos && x === xPos)) {
@@ -228,7 +260,11 @@ const Snake = () => {
 					<div
 						className={`goldenFood ${goldenCoords[0] === 0 && 'hidden'}`}
 						style={{ gridArea: `${goldenCoords[0]} / ${goldenCoords[1]}` }}
-					></div>
+					/>
+					<div
+						className={`shroom ${shroomCoords[0] === 0 && 'hidden'}`}
+						style={{ gridArea: `${shroomCoords[0]} / ${shroomCoords[1]}` }}
+					/>
 				</div>
 				<div className="colorGrid">
 					{colors.map((color) => (
