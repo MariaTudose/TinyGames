@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getFoodCoords, modN, getRandomCoords, getRandomColor } from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Leaderboards from './Leaderboard';
+import poison from '../../static/sounds/poisoned.mp3';
+import crunch from '../../static/sounds/crunch.mp3';
+import golden from '../../static/sounds/golden.wav';
 
 import './styles.scss';
 
@@ -62,7 +65,7 @@ const Snake = () => {
 	useEffect(() => {
 		// Speed up snake
 		if (!poisoned) {
-		setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50);
+			setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50);
 		}
 
 		// Spawn shroom every 12 apples
@@ -91,17 +94,23 @@ const Snake = () => {
 
 	// Eat food
 	useEffect(() => {
+		const foodAudio = new Audio(crunch);
+		const poisonAudio = new Audio(poison);
+		const goldenAudio = new Audio(golden);
+
 		const [yPos, xPos] = coords[0];
 		if (yPos === appleCoords[0] && xPos === appleCoords[1]) {
 			setSnakeLength((length) => length + 1);
 			setScore((score) => score + 1);
 			setAppleCoords(getFoodCoords(coords));
+			foodAudio.play();
 		}
 
 		if (yPos === goldenCoords[0] && xPos === goldenCoords[1]) {
 			setSnakeLength((length) => length + 1);
 			setScore((score) => score + 5);
 			setGoldenCoords([0, 0]);
+			goldenAudio.play();
 		}
 
 		if (yPos === shroomCoords[0] && xPos === shroomCoords[1]) {
@@ -109,12 +118,14 @@ const Snake = () => {
 			setPoisoned(true);
 			setShroomCoords([0, 0]);
 			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.3);
+			poisonAudio.play();
 
 			const interval = setInterval(() => {
 				setSelectedColor(getRandomColor());
 			}, snakeSpeed);
 
 			setTimeout(() => {
+				poisonAudio.pause();
 				setPoisoned(false);
 				clearInterval(interval);
 				setSelectedColor(previousColor);
