@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { getDatabase, ref, child, get, push, set } from 'firebase/database';
 import { isSameWeek } from 'date-fns';
+import { isSameWeekAsToday } from './utils';
 
-type Score = {
+export type Score = {
 	name: string;
 	score: number;
 	timestamp: string;
@@ -26,7 +27,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 				return res;
 			}, {})
 		);
-		setLeaderBoard(newLeaderBoard.sort((a, b) => b.score - a.score));
+		return newLeaderBoard.sort((a, b) => b.score - a.score).slice(0, 10);
 	};
 
 	// Populate leaderboard
@@ -37,7 +38,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 				if (snapshot.exists()) {
 					const data = snapshot.toJSON();
 					if (data) {
-						filterScores(Object.values(data));
+						setLeaderBoard(Object.values(data));
 					}
 				} else {
 					console.log('No data available');
@@ -65,7 +66,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 			const leaderboardRef = ref(getDatabase(), 'leaderboard');
 			const newScoreRef = push(leaderboardRef);
 			set(newScoreRef, newScore).then(() => {
-				filterScores([newScore, ...leaderBoard]);
+				setLeaderBoard([newScore, ...leaderBoard]);
 			});
 		}
 	};
@@ -75,31 +76,24 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 			<h2>Top 10 this week</h2>
 			<table>
 				<tbody>
-					{leaderBoard
-						.filter((score) => isSameWeek(score.timestamp, new Date(), { weekStartsOn: 1 }))
-						.sort((a, b) => b.score - a.score)
-						.slice(0, 10)
-						.map((score, i) => (
-							<tr key={i}>
-								<td>{score.name}</td>
-								<td>{score.score}</td>
-							</tr>
-						))}
+					{filterScores(leaderBoard.filter(isSameWeekAsToday)).map((score, i) => (
+						<tr key={i}>
+							<td>{score.name}</td>
+							<td>{score.score}</td>
+						</tr>
+					))}
 				</tbody>
 			</table>
 			<br />
 			<h2>Top 10 all time</h2>
 			<table>
 				<tbody>
-					{leaderBoard
-						.sort((a, b) => b.score - a.score)
-						.slice(0, 10)
-						.map((score, i) => (
-							<tr key={i}>
-								<td>{score.name}</td>
-								<td>{score.score}</td>
-							</tr>
-						))}
+					{filterScores(leaderBoard).map((score, i) => (
+						<tr key={i}>
+							<td>{score.name}</td>
+							<td>{score.score}</td>
+						</tr>
+					))}
 				</tbody>
 			</table>
 			<form className={`name ${gameOver && newHighScore() && 'visible'}`} onSubmit={enterName}>

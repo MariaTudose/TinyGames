@@ -1,3 +1,6 @@
+import { isSameWeek } from 'date-fns';
+import { Score } from './Leaderboard';
+
 export const n = 15;
 export const getRandomPos = () => Math.ceil(Math.random() * (n - 1));
 export const getRandomCoords = () => [getRandomPos(), getRandomPos()];
@@ -22,3 +25,5 @@ export const getRandomColor = () => {
 	const lightness = 70 + 10 * Math.random();
 	return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 };
+
+export const isSameWeekAsToday = (score: Score) => isSameWeek(score.timestamp, new Date(), { weekStartsOn: 1 });
