@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getFoodCoords, modN, getRandomCoords, getRandomColor } from './utils';
+import cx from 'classnames';
+import { getFoodCoords, modN, getRandomCoords, getRandomColor, checkNeighbors } from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Leaderboards from './Leaderboard';
 import poison from '../../static/sounds/poisoned.mp3';
@@ -241,51 +242,21 @@ const Snake = () => {
 						backgroundColor: colorsSwapped ? snakeColor : backgroundColor,
 					}}
 				>
-					{Array.from(Array(snakeLength).keys()).map((snakeL) => {
-						if (coords.length > snakeL) {
-							const newYPos = coords[snakeL][0];
-							const newXPos = coords[snakeL][1];
-
-							let hasTopNeighbor = false;
-							let hasLeftNeighbor = false;
-							let hasBottomNeighbor = false;
-							let hasRightNeighbor = false;
-
-							// TODO clean up code
-							if (snakeL !== 0) {
-								const prevY = coords[snakeL - 1][0];
-								const prevX = coords[snakeL - 1][1];
-								hasTopNeighbor = prevY === newYPos - 1 && prevX === newXPos;
-								hasLeftNeighbor = prevY === newYPos && prevX === newXPos - 1;
-								hasBottomNeighbor = prevY === newYPos + 1 && prevX === newXPos;
-								hasRightNeighbor = prevY === newYPos && prevX === newXPos + 1;
-							}
-							if (coords.length > snakeL + 1) {
-								const nextY = coords[snakeL + 1][0];
-								const nextX = coords[snakeL + 1][1];
-								hasTopNeighbor = hasTopNeighbor || (nextY === newYPos - 1 && nextX === newXPos);
-								hasLeftNeighbor = hasLeftNeighbor || (nextY === newYPos && nextX === newXPos - 1);
-								hasBottomNeighbor = hasBottomNeighbor || (nextY === newYPos + 1 && nextX === newXPos);
-								hasRightNeighbor = hasRightNeighbor || (nextY === newYPos && nextX === newXPos + 1);
-							}
-							return (
-								<div
-									key={snakeL}
-									className={`snake snake${snakeL} ${verticalDir.includes(dir) ? 'rotate' : ''} ${
-										colorsSwapped ? 'swapped' : ''
-									}`}
-									style={{
-										borderLeft: hasLeftNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
-										borderTop: hasTopNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
-										borderRight: hasRightNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
-										borderBottom: hasBottomNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
-										gridArea: `${newYPos} / ${newXPos}`,
-										backgroundColor: colorsSwapped ? backgroundColor : snakeColor,
-									}}
-								/>
-							);
-						}
-					})}
+					{coords.map(([yPos, xPos], i) => (
+						<div
+							key={i}
+							className={cx('snake', {
+								head: i === 0,
+								rotate: verticalDir.includes(dir),
+								colorsSwapped,
+								...checkNeighbors(coords, yPos, xPos, i),
+							})}
+							style={{
+								gridArea: `${yPos} / ${xPos}`,
+								backgroundColor: colorsSwapped ? backgroundColor : snakeColor,
+							}}
+						/>
+					))}
 					<div className="food" style={{ gridArea: `${appleCoords[0]} / ${appleCoords[1]}` }}></div>
 					<div
 						className={`goldenFood ${goldenCoords[0] === 0 && 'hidden'}`}

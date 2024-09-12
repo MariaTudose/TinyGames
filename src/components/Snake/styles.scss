@@ -88,8 +88,11 @@
 }
 
 .snake {
-	&.snake0 {
+	border: 1px solid rgba(0, 0, 0, 0.25);
+
+	&.head {
 		position: relative;
+
 		&::after {
 			content: '';
 			position: absolute;
@@ -107,9 +110,14 @@
 		}
 	}
 
-	&.swapped::after {
+	&.colorsSwapped::after {
 		filter: invert(100%);
 	}
+
+	&.hasLeftNeighbor { border-left: unset }
+	&.hasTopNeighbor { border-top: unset }
+	&.hasRightNeighbor { border-right: unset }
+	&.hasBottomNeighbor { border-bottom: unset }
 }
 
 .food {
