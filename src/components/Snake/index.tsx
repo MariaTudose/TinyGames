@@ -35,31 +35,41 @@ const opposites: Record<Direction, string> = {
 const verticalDir = ['ArrowDown', 'ArrowUp', 'w', 's'];
 const startingSpeed = 300;
 const scale = (Math.log(50) - Math.log(startingSpeed)) / (40 - 1);
-const colors = ['#ca98f7', '#F19ED2', 'pink', '#ffa97e', '#F9F9E0', '#C0C78C', '#8ee5a1', '#8af0ff'];
+const colors = ['#ffc0cb', '#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#aff4fb', '#accbfd', '#c7bff8'];
+const backgroundColor = '#242424';
 
 const Snake = () => {
 	const intervalRef = useRef<number>();
+
+	// Game status
 	const [gameOver, setGameOver] = useState(false);
 	const [gameStarted, setGameStarted] = useState(false);
+	const [score, setScore] = useState(0);
+
+	// Coordinates
 	const [dir, setDir] = useState(Direction.ArrowRight);
+	const [coords, setCoords] = useState([getRandomCoords()]);
 	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
 	const [goldenCoords, setGoldenCoords] = useState([0, 0]);
 	const [shroomCoords, setShroomCoords] = useState([0, 0]);
+
+	// Snake properties
 	const [snakeLength, setSnakeLength] = useState(1);
-	const [score, setScore] = useState(0);
-	const [coords, setCoords] = useState([getRandomCoords()]);
 	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
-	const { value, setItem } = useLocalStorage('color', 'pink');
-	const [selectedColor, setSelectedColor] = useState('pink');
 	const [poisoned, setPoisoned] = useState(true);
+
+	// Colors
+	const { value, setItem } = useLocalStorage('color', colors[0]);
+	const [snakeColor, setSnakeColor] = useState(colors[0]);
+	const [colorsSwapped, setColorsSwapped] = useState(false);
 
 	const selectColor = (color: string) => {
 		setItem(color);
-		setSelectedColor(color);
+		setSnakeColor(color);
 	};
 
 	useEffect(() => {
-		if (value) setSelectedColor(value);
+		if (value) setSnakeColor(value);
 	}, [value]);
 
 	useEffect(() => {
@@ -114,24 +124,24 @@ const Snake = () => {
 		}
 
 		if (yPos === shroomCoords[0] && xPos === shroomCoords[1]) {
-			const previousColor = selectedColor;
+			const previousColor = snakeColor;
 			setPoisoned(true);
 			setShroomCoords([0, 0]);
 			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.3);
 			poisonAudio.play();
 
 			const interval = setInterval(() => {
-				setSelectedColor(getRandomColor());
+				setSnakeColor(getRandomColor());
 			}, snakeSpeed);
 
 			setTimeout(() => {
 				poisonAudio.pause();
 				setPoisoned(false);
 				clearInterval(interval);
-				setSelectedColor(previousColor);
-			}, 5000);
+				setSnakeColor(previousColor);
+			}, 6000);
 		}
-	}, [appleCoords, coords, goldenCoords, selectedColor, shroomCoords, snakeSpeed]);
+	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed]);
 
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
 		if (coords.slice(0, -1).find(([y, x]) => y === yPos && x === xPos)) {
@@ -223,7 +233,14 @@ const Snake = () => {
 			<h1 className={`snakeHeader ${gameOver}`}>{`Game over`}</h1>
 			<h4 className="score">{`Score: ${score}`}</h4>
 			<div className="flexRow">
-				<div className="gameGrid" tabIndex={0} style={{ border: `1px solid ${selectedColor}` }}>
+				<div
+					className="gameGrid"
+					tabIndex={0}
+					style={{
+						border: `1px solid ${snakeColor}`,
+						backgroundColor: colorsSwapped ? snakeColor : backgroundColor,
+					}}
+				>
 					{Array.from(Array(snakeLength).keys()).map((snakeL) => {
 						if (coords.length > snakeL) {
 							const newYPos = coords[snakeL][0];
@@ -254,14 +271,16 @@ const Snake = () => {
 							return (
 								<div
 									key={snakeL}
-									className={`snake snake${snakeL} ${verticalDir.includes(dir) ? 'rotate' : ''}`}
+									className={`snake snake${snakeL} ${verticalDir.includes(dir) ? 'rotate' : ''} ${
+										colorsSwapped ? 'swapped' : ''
+									}`}
 									style={{
 										borderLeft: hasLeftNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
 										borderTop: hasTopNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
 										borderRight: hasRightNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
 										borderBottom: hasBottomNeighbor ? 'none' : `1px solid rgba(0, 0, 0, 0.25)`,
 										gridArea: `${newYPos} / ${newXPos}`,
-										backgroundColor: selectedColor,
+										backgroundColor: colorsSwapped ? backgroundColor : snakeColor,
 									}}
 								/>
 							);
@@ -286,6 +305,12 @@ const Snake = () => {
 							onClick={() => selectColor(color)}
 						></div>
 					))}
+					<label className="colorPicker">
+						<input type="color" value={snakeColor} onChange={(e) => setSnakeColor(e.target.value)} />
+					</label>
+					<div onClick={() => setColorsSwapped((swap) => !swap)} className="reverse">
+						{'\u21BB'}
+					</div>
 				</div>
 			</div>
 			<div>

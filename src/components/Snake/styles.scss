@@ -56,6 +56,11 @@
 	}
 }
 
+.flexRow {
+	display: flex;
+	position: relative;
+}
+
 .gameGrid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
@@ -63,10 +68,9 @@
 	width: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
 	height: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
 	border: 1px solid pink;
-	
 	&:focus,
 	&:focus-visible {
-    outline: none;
+		outline: none;
 	}
 }
 
@@ -79,26 +83,32 @@
 	}
 }
 
+.reverse {
+	cursor: pointer;
+}
+
 .snake {
 	&.snake0 {
 		position: relative;
-		
 		&::after {
-			content: "";
-			background-image: url(../../static/snek.svg);
-			background-size: contain;
+			content: '';
 			position: absolute;
-			left: 0;
 			top: 0;
+			left: 0;
+			transform: rotate(90deg);
 			width: 13px;
 			height: 13px;
-			transform: rotate(90deg);
-			// TODO Fix eyes
+			background-image: url(../../static/snek.svg);
+			background-size: contain;
 		}
-		
+
 		&.rotate::after {
 			transform: rotate(0deg);
 		}
+	}
+
+	&.swapped::after {
+		filter: invert(100%);
 	}
 }
 
@@ -124,6 +134,8 @@
 }
 
 .colorGrid {
+	position: absolute;
+	right: calc(-1 * var(--snake-grid-size) - 0.25em);
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
 	grid-auto-rows: var(--snake-grid-size);
@@ -131,6 +143,11 @@
 	height: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
 }
 
-.flexRow {
-	display: flex;
+.colorPicker {
+	width: var(--snake-grid-size);
+	height: var(--snake-grid-size);
+	background: linear-gradient(in hsl longer hue 90deg, #4368f8 0 0);
+	input {
+		visibility: hidden;
+	}
 }
