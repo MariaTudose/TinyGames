@@ -54,7 +54,9 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 	}, [gameOver]);
 
 	const newHighScore = () => {
-		const topWeek = leaderBoard.filter((score) => isSameWeek(score.timestamp, new Date(), { weekStartsOn: 1 }));
+		const topWeek = filterScores(
+			leaderBoard.filter((score) => isSameWeek(score.timestamp, new Date(), { weekStartsOn: 1 }))
+		);
 		return topWeek.length < 10 || Math.min(...topWeek.map((score) => score.score)) < score;
 	};
 
