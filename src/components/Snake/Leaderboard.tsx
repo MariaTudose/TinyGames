@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { getDatabase, ref, child, get, push, set } from 'firebase/database';
+import { isSameWeek } from 'date-fns';
 
 type Score = {
 	name: string;
 	score: number;
+	timestamp: string;
 };
 
 interface LeaderboardProps {
@@ -24,7 +26,7 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 				return res;
 			}, {})
 		);
-		setLeaderBoard(newLeaderBoard.sort((a, b) => b.score - a.score).slice(0, 15));
+		setLeaderBoard(newLeaderBoard.sort((a, b) => b.score - a.score));
 	};
 
 	// Populate leaderboard
@@ -50,13 +52,16 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 		if (gameOver && inputRef.current) inputRef.current.focus();
 	}, [gameOver]);
 
-	const newHighScore = () => leaderBoard.length < 15 || Math.min(...leaderBoard.map((score) => score.score)) < score;
+	const newHighScore = () => {
+		const topWeek = leaderBoard.filter((score) => isSameWeek(score.timestamp, new Date(), { weekStartsOn: 1 }));
+		return topWeek.length < 10 || Math.min(...topWeek.map((score) => score.score)) < score;
+	};
 
 	const enterName = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setGameOver(false);
 		if (newHighScore()) {
-			const newScore = { name, score, timeStamp: new Date().toISOString() };
+			const newScore = { name, score, timestamp: new Date().toISOString() };
 			const leaderboardRef = ref(getDatabase(), 'leaderboard');
 			const newScoreRef = push(leaderboardRef);
 			set(newScoreRef, newScore).then(() => {
@@ -67,11 +72,28 @@ const Leaderboard = ({ setGameOver, gameOver, score }: LeaderboardProps) => {
 
 	return (
 		<div className="aside">
-			<h2>Leaderboard</h2>
+			<h2>Top 10 this week</h2>
+			<table>
+				<tbody>
+					{leaderBoard
+						.filter((score) => isSameWeek(score.timestamp, new Date(), { weekStartsOn: 1 }))
+						.sort((a, b) => b.score - a.score)
+						.slice(0, 10)
+						.map((score, i) => (
+							<tr key={i}>
+								<td>{score.name}</td>
+								<td>{score.score}</td>
+							</tr>
+						))}
+				</tbody>
+			</table>
+			<br />
+			<h2>Top 10 all time</h2>
 			<table>
 				<tbody>
 					{leaderBoard
 						.sort((a, b) => b.score - a.score)
+						.slice(0, 10)
 						.map((score, i) => (
 							<tr key={i}>
 								<td>{score.name}</td>
