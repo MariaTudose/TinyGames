@@ -57,12 +57,15 @@ const Snake = () => {
 	// Snake properties
 	const [snakeLength, setSnakeLength] = useState(1);
 	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
-	const [poisoned, setPoisoned] = useState(true);
+	const [poisoned, setPoisoned] = useState(false);
 
 	// Colors
 	const { value, setItem } = useLocalStorage('color', colors[0]);
 	const [snakeColor, setSnakeColor] = useState(colors[0]);
 	const [colorsSwapped, setColorsSwapped] = useState(false);
+
+	// Sound
+	const { value: muted, setItem: setMuted } = useLocalStorage('muted', false);
 
 	const selectColor = (color: string) => {
 		setItem(color);
@@ -109,6 +112,10 @@ const Snake = () => {
 		const poisonAudio = new Audio(poison);
 		const goldenAudio = new Audio(golden);
 
+		foodAudio.muted = !!muted;
+		poisonAudio.muted = !!muted;
+		goldenAudio.muted = !!muted;
+
 		const [yPos, xPos] = coords[0];
 		if (yPos === appleCoords[0] && xPos === appleCoords[1]) {
 			setSnakeLength((length) => length + 1);
@@ -142,7 +149,7 @@ const Snake = () => {
 				setSnakeColor(previousColor);
 			}, 6000);
 		}
-	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed]);
+	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed, muted]);
 
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
 		if (coords.slice(0, -1).find(([y, x]) => y === yPos && x === xPos)) {
@@ -281,6 +288,9 @@ const Snake = () => {
 					</label>
 					<div onClick={() => setColorsSwapped((swap) => !swap)} className="reverse">
 						{'\u21BB'}
+					</div>
+					<div onClick={() => setMuted(!muted)} className="sound">
+						{muted ? '🔇' : '🔊'}
 					</div>
 				</div>
 			</div>
