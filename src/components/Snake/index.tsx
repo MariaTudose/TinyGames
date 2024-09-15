@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSound } from 'use-sound';
 import cx from 'classnames';
 import { getFoodCoords, modN, getRandomCoords, getRandomColor, checkNeighbors } from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -66,6 +67,9 @@ const Snake = () => {
 
 	// Sound
 	const { value: muted, setItem: setMuted } = useLocalStorage('muted', false);
+	const [poisonAudio] = useSound(poison, { volume: muted ? 0 : 1 });
+	const [goldenAudio] = useSound(golden, { volume: muted ? 0 : 1 });
+	const [foodAudio] = useSound(crunch, { playbackRate: 1 + Math.random(), volume: muted ? 0 : 1 });
 
 	const selectColor = (color: string) => {
 		setItem(color);
@@ -108,27 +112,19 @@ const Snake = () => {
 
 	// Eat food
 	useEffect(() => {
-		const foodAudio = new Audio(crunch);
-		const poisonAudio = new Audio(poison);
-		const goldenAudio = new Audio(golden);
-
-		foodAudio.muted = !!muted;
-		poisonAudio.muted = !!muted;
-		goldenAudio.muted = !!muted;
-
 		const [yPos, xPos] = coords[0];
 		if (yPos === appleCoords[0] && xPos === appleCoords[1]) {
 			setSnakeLength((length) => length + 1);
 			setScore((score) => score + 1);
 			setAppleCoords(getFoodCoords(coords));
-			foodAudio.play();
+			foodAudio();
 		}
 
 		if (yPos === goldenCoords[0] && xPos === goldenCoords[1]) {
 			setSnakeLength((length) => length + 1);
 			setScore((score) => score + 5);
 			setGoldenCoords([0, 0]);
-			goldenAudio.play();
+			goldenAudio();
 		}
 
 		if (yPos === shroomCoords[0] && xPos === shroomCoords[1]) {
@@ -136,19 +132,19 @@ const Snake = () => {
 			setPoisoned(true);
 			setShroomCoords([0, 0]);
 			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.3);
-			poisonAudio.play();
+			poisonAudio();
 
 			const interval = setInterval(() => {
 				setSnakeColor(getRandomColor());
 			}, snakeSpeed);
 
 			setTimeout(() => {
-				poisonAudio.pause();
 				setPoisoned(false);
 				clearInterval(interval);
 				setSnakeColor(previousColor);
 			}, 6000);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed, muted]);
 
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
@@ -259,6 +255,7 @@ const Snake = () => {
 								...checkNeighbors(coords, yPos, xPos, i),
 							})}
 							style={{
+								zIndex: snakeLength - i,
 								gridArea: `${yPos} / ${xPos}`,
 								backgroundColor: colorsSwapped ? backgroundColor : snakeColor,
 							}}
