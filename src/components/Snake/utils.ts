@@ -39,3 +39,14 @@ export const checkNeighbors = (coords: number[][], yPos: number, xPos: number, i
 
 	return { hasTopNeighbor, hasLeftNeighbor, hasBottomNeighbor, hasRightNeighbor };
 };
+
+export const blinkInterval = (setSnakeColor: (color: string) => void, color: string, duration: number) => {
+	let counter = 0;
+	const interval = setInterval(() => {
+		counter += 1;
+		if (counter % 2 === 0) setSnakeColor(color);
+		else setSnakeColor('#fff');
+	}, duration);
+
+	return interval;
+};

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSound } from 'use-sound';
 import cx from 'classnames';
-import { getFoodCoords, modN, getRandomCoords, getRandomColor, checkNeighbors } from './utils';
+import { getFoodCoords, modN, getRandomCoords, getRandomColor, checkNeighbors, blinkInterval } from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Leaderboards from './Leaderboard';
 import poison from '../../static/sounds/poisoned.mp3';
 import crunch from '../../static/sounds/crunch.mp3';
 import golden from '../../static/sounds/golden.wav';
+import star from '../../static/sounds/star.mp3';
 
 import './styles.scss';
 
@@ -54,11 +55,13 @@ const Snake = () => {
 	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
 	const [goldenCoords, setGoldenCoords] = useState([0, 0]);
 	const [shroomCoords, setShroomCoords] = useState([0, 0]);
+	const [starCoords, setStarCoords] = useState([0, 0]);
 
 	// Snake properties
 	const [snakeLength, setSnakeLength] = useState(1);
 	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
 	const [poisoned, setPoisoned] = useState(false);
+	const [invincible, setInvincible] = useState(false);
 
 	// Colors
 	const { value, setItem } = useLocalStorage('color', colors[0]);
@@ -70,6 +73,7 @@ const Snake = () => {
 	const [poisonAudio] = useSound(poison, { volume: muted ? 0 : 1 });
 	const [goldenAudio] = useSound(golden, { volume: muted ? 0 : 1 });
 	const [foodAudio] = useSound(crunch, { playbackRate: 1 + Math.random(), volume: muted ? 0 : 1 });
+	const [playStar] = useSound(star, { volume: muted ? 0 : 0.15 });
 
 	const selectColor = (color: string) => {
 		setItem(color);
@@ -87,13 +91,24 @@ const Snake = () => {
 		}
 
 		// Spawn shroom every 12 apples
-		if (snakeLength > 1 && (snakeLength - 1) % 12 === 0) {
+		if (!invincible && snakeLength > 1 && (snakeLength - 1) % 12 === 0) {
 			const [shroomY, shroomX] = getFoodCoords(coords);
 			const [snakeY, snakeX] = coords[0];
 			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - shroomY) + Math.abs(snakeX - shroomX)));
 			setShroomCoords([shroomY, shroomX]);
 			setTimeout(() => {
 				setShroomCoords([0, 0]);
+			}, time);
+		}
+
+		// Spawn star every 10 apples
+		if (!poisoned && snakeLength > 1 && (snakeLength - 1) % 10 === 0) {
+			const [starY, starX] = getFoodCoords(coords);
+			const [snakeY, snakeX] = coords[0];
+			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - starY) + Math.abs(snakeX - starX)));
+			setStarCoords([starY, starX]);
+			setTimeout(() => {
+				setStarCoords([0, 0]);
 			}, time);
 		}
 
@@ -131,7 +146,8 @@ const Snake = () => {
 			const previousColor = snakeColor;
 			setPoisoned(true);
 			setShroomCoords([0, 0]);
-			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.3);
+			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.4);
+			setScore((score) => score + 3);
 			poisonAudio();
 
 			const interval = setInterval(() => {
@@ -144,8 +160,30 @@ const Snake = () => {
 				setSnakeColor(previousColor);
 			}, 6000);
 		}
+
+		if (yPos === starCoords[0] && xPos === starCoords[1]) {
+			playStar();
+			setInvincible(true);
+			setStarCoords([0, 0]);
+			const currentColor = snakeColor;
+			const slowBlink = blinkInterval(setSnakeColor, currentColor, 250);
+
+			setTimeout(() => {
+				clearInterval(slowBlink);
+				const fastBlink = blinkInterval(setSnakeColor, currentColor, 50);
+
+				setTimeout(() => {
+					clearInterval(fastBlink);
+				}, 2000);
+			}, 6000);
+
+			setTimeout(() => {
+				setInvincible(false);
+				setSnakeColor(currentColor);
+			}, 8000);
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed, muted]);
+	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed, muted, starCoords]);
 
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
 		if (coords.slice(0, -1).find(([y, x]) => y === yPos && x === xPos)) {
@@ -161,11 +199,11 @@ const Snake = () => {
 		(coords: Coordinates, yDir: number, xDir: number) => {
 			const yPos = modN(coords[0][0] + yDir);
 			const xPos = modN(coords[0][1] + xDir);
-			if (!checkCollisions(coords, yPos, xPos)) {
+			if (invincible || !checkCollisions(coords, yPos, xPos)) {
 				return [[yPos, xPos], ...coords.slice(0, snakeLength - 1)];
 			} else return coords;
 		},
-		[checkCollisions, snakeLength]
+		[checkCollisions, invincible, snakeLength]
 	);
 
 	const handleMove = useCallback(
@@ -269,6 +307,10 @@ const Snake = () => {
 					<div
 						className={`shroom ${shroomCoords[0] === 0 && 'hidden'}`}
 						style={{ gridArea: `${shroomCoords[0]} / ${shroomCoords[1]}` }}
+					/>
+					<div
+						className={`star ${starCoords[0] === 0 && 'hidden'}`}
+						style={{ gridArea: `${starCoords[0]} / ${starCoords[1]}` }}
 					/>
 				</div>
 				<div className="colorGrid">

@@ -141,6 +141,14 @@
 	}
 }
 
+.star {
+	background-image: url(../../static/star.png);
+	background-size: contain;
+	&.hidden {
+		visibility: hidden;
+	}
+}
+
 .colorGrid {
 	position: absolute;
 	right: calc(-1 * var(--snake-grid-size) - 0.25em);
