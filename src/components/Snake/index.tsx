@@ -16,10 +16,16 @@ import poison from '../../static/sounds/poisoned.mp3';
 import crunch from '../../static/sounds/crunch.mp3';
 import golden from '../../static/sounds/golden.wav';
 import star from '../../static/sounds/star.mp3';
+import { useItem } from '../../hooks/useItem';
 
 import './styles.scss';
 
 type Coordinates = number[][];
+
+enum SpecialItem {
+	Star,
+	Shroom,
+}
 
 enum Direction {
 	ArrowUp = 'ArrowUp',
@@ -51,6 +57,7 @@ const backgroundColor = '#242424';
 
 const Snake = () => {
 	const intervalRef = useRef<number>();
+	const [nextItem, setNextItem] = useState(SpecialItem.Star);
 
 	// Game status
 	const [title, setTitle] = useState('');
@@ -60,19 +67,19 @@ const Snake = () => {
 	const [timeStarted, setTimeStarted] = useState<Date>(new Date());
 	const { setItem: setName } = useLocalStorage('name', '');
 
-	// Coordinates
-	const [dir, setDir] = useState(Direction.ArrowRight);
-	const [coords, setCoords] = useState([getRandomCoords()]);
-	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
-	const [goldenCoords, setGoldenCoords] = useState([0, 0]);
-	const [shroomCoords, setShroomCoords] = useState([0, 0]);
-	const [starCoords, setStarCoords] = useState([0, 0]);
-
 	// Snake properties
 	const [snakeLength, setSnakeLength] = useState(1);
 	const [snakeSpeed, setSnakeSpeed] = useState(startingSpeed);
 	const [poisoned, setPoisoned] = useState(false);
 	const [invincible, setInvincible] = useState(false);
+
+	// Coordinates
+	const [dir, setDir] = useState(Direction.ArrowRight);
+	const [coords, setCoords] = useState([[8, 8]]);
+	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
+	const [goldenCoords, setGoldenCoords, spawnGolden] = useItem(coords, snakeSpeed);
+	const [shroomCoords, setShroomCoords, spawnShroom] = useItem(coords, snakeSpeed);
+	const [starCoords, setStarCoords, spawnStar] = useItem(coords, snakeSpeed);
 
 	// Colors
 	const { value, setItem } = useLocalStorage('color', colors[0]);
@@ -101,38 +108,18 @@ const Snake = () => {
 			setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 60);
 		}
 
-		// Spawn shroom every 12 apples
-		if (!invincible && snakeLength > 1 && (snakeLength - 1) % 12 === 0) {
-			const [shroomY, shroomX] = getFoodCoords(coords);
-			const [snakeY, snakeX] = coords[0];
-			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - shroomY) + Math.abs(snakeX - shroomX)));
-			setShroomCoords([shroomY, shroomX]);
-			setTimeout(() => {
-				setShroomCoords([0, 0]);
-			}, time);
-		}
-
-		// Spawn star every 10 apples
-		if (!poisoned && snakeLength > 1 && (snakeLength - 1) % 10 === 0) {
-			const [starY, starX] = getFoodCoords(coords);
-			const [snakeY, snakeX] = coords[0];
-			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - starY) + Math.abs(snakeX - starX)));
-			setStarCoords([starY, starX]);
-			setTimeout(() => {
-				setStarCoords([0, 0]);
-			}, time);
+		// Spawn shroom or star
+		if (!poisoned && !invincible && shroomCoords[0] === 0 && starCoords[0] === 0 && snakeLength % 7 === 0) {
+			if (nextItem === SpecialItem.Shroom) spawnShroom();
+			else spawnStar();
+			setNextItem(Math.round(Math.random()));
 		}
 
 		// Spawn golden apple every 5 apples
 		if (snakeLength > 1 && (snakeLength - 1) % 5 === 0) {
-			const [foodY, foodX] = getFoodCoords(coords);
-			const [snakeY, snakeX] = coords[0];
-			const time = Math.max(2000, snakeSpeed * (Math.abs(snakeY - foodY) + Math.abs(snakeX - foodX)));
-			setGoldenCoords([foodY, foodX]);
-			setTimeout(() => {
-				setGoldenCoords([0, 0]);
-			}, time);
+			spawnGolden();
 		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [snakeLength]);
 
@@ -191,7 +178,7 @@ const Snake = () => {
 			setTimeout(() => {
 				setInvincible(false);
 				setSnakeColor(currentColor);
-			}, 8000);
+			}, 8100);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [appleCoords, coords, goldenCoords, snakeColor, shroomCoords, snakeSpeed, muted, starCoords]);
