@@ -1,4 +1,4 @@
-import { isSameWeek } from 'date-fns';
+import { differenceInMinutes, differenceInSeconds, isSameWeek } from 'date-fns';
 import { Score } from './Leaderboard';
 
 export const n = 15;
@@ -49,4 +49,10 @@ export const blinkInterval = (setSnakeColor: (color: string) => void, color: str
 	}, duration);
 
 	return interval;
+};
+
+export const getTimeDiff = (timeStarted: Date) => {
+	const minutes = String(differenceInMinutes(new Date(), timeStarted)).padStart(2, '0');
+	const seconds = String(differenceInSeconds(new Date(), timeStarted) % 60).padStart(2, '0');
+	return `${minutes}:${seconds}`;
 };

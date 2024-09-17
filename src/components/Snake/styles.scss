@@ -22,9 +22,8 @@
 		font-size: 1.25rem;
 	}
 
-	.score {
-		display: flex;
-		justify-content: space-around;
+	.player {
+		color: gold;
 	}
 
 	.name {
@@ -61,6 +60,11 @@
 	position: relative;
 }
 
+.stats {
+	display: flex;
+	gap: 0.5rem;
+}
+
 .gameGrid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
@@ -75,12 +79,9 @@
 }
 
 .snakeHeader {
-	visibility: hidden;
+	height: 50px;
 	margin: 2rem 1rem;
 	color: white;
-	&.true {
-		visibility: visible;
-	}
 }
 
 .reverse {

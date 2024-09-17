@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSound } from 'use-sound';
 import cx from 'classnames';
-import { getFoodCoords, modN, getRandomCoords, getRandomColor, checkNeighbors, blinkInterval } from './utils';
+import {
+	getFoodCoords,
+	modN,
+	getRandomCoords,
+	getRandomColor,
+	checkNeighbors,
+	blinkInterval,
+	getTimeDiff,
+} from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import Leaderboards from './Leaderboard';
 import poison from '../../static/sounds/poisoned.mp3';
@@ -37,7 +45,7 @@ const opposites: Record<Direction, string> = {
 
 const verticalDir = ['ArrowDown', 'ArrowUp', 'w', 's'];
 const startingSpeed = 300;
-const scale = (Math.log(50) - Math.log(startingSpeed)) / (40 - 1);
+const scale = (Math.log(60) - Math.log(startingSpeed)) / (40 - 1);
 const colors = ['#ffc0cb', '#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#aff4fb', '#accbfd', '#c7bff8'];
 const backgroundColor = '#242424';
 
@@ -45,9 +53,12 @@ const Snake = () => {
 	const intervalRef = useRef<number>();
 
 	// Game status
+	const [title, setTitle] = useState('');
 	const [gameOver, setGameOver] = useState(false);
 	const [gameStarted, setGameStarted] = useState(false);
 	const [score, setScore] = useState(0);
+	const [timeStarted, setTimeStarted] = useState<Date>(new Date());
+	const { setItem: setName } = useLocalStorage('name', '');
 
 	// Coordinates
 	const [dir, setDir] = useState(Direction.ArrowRight);
@@ -87,7 +98,7 @@ const Snake = () => {
 	useEffect(() => {
 		// Speed up snake
 		if (!poisoned) {
-			setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 50);
+			setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 60);
 		}
 
 		// Spawn shroom every 12 apples
@@ -187,7 +198,6 @@ const Snake = () => {
 
 	const checkCollisions = useCallback((coords: Coordinates, yPos: number, xPos: number) => {
 		if (coords.slice(0, -1).find(([y, x]) => y === yPos && x === xPos)) {
-			console.log('coords', coords, xPos, yPos);
 			setGameStarted(false);
 			setGameOver(true);
 			clearInterval(intervalRef.current);
@@ -228,10 +238,6 @@ const Snake = () => {
 		(e: KeyboardEvent) => {
 			const { key } = e;
 			const isArrowKey = Object.values(Direction).includes(key as Direction);
-			if (!gameStarted && !gameOver && key === ' ') {
-				e.preventDefault();
-				startGame();
-			}
 			if (gameStarted && isArrowKey) {
 				e.preventDefault();
 				if (opposites[dir] !== key) {
@@ -240,7 +246,7 @@ const Snake = () => {
 				}
 			}
 		},
-		[dir, gameOver, gameStarted, handleMove]
+		[dir, gameStarted, handleMove]
 	);
 
 	// Listen to arrow keys
@@ -262,18 +268,24 @@ const Snake = () => {
 
 	const startGame = () => {
 		setScore(0);
+		setTitle('');
 		setSnakeLength(1);
 		setGameOver(false);
 		setCoords([[8, 8]]);
 		setGameStarted(true);
+		setTimeStarted(new Date());
 		setDir(Direction.ArrowRight);
 		setSnakeSpeed(startingSpeed);
 	};
 
 	return (
 		<div className="snakeContainer">
-			<h1 className={`snakeHeader ${gameOver}`}>{`Game over`}</h1>
-			<h4 className="score">{`Score: ${score}`}</h4>
+			<h1 className="snakeHeader">{title}</h1>
+			<div className="stats">
+				<h4>{`Score: ${score}`}</h4>
+				<h4>{`Length: ${snakeLength}`}</h4>
+				<h4>{`Time: ${getTimeDiff(timeStarted)}`}</h4>
+			</div>
 			<div className="flexRow">
 				<div
 					className="gameGrid"
@@ -337,11 +349,23 @@ const Snake = () => {
 				<button className="startButton" onClick={startGame}>
 					start
 				</button>
-				<button className="startButton" onClick={() => setGameStarted(false)}>
-					stop
+				<button
+					onClick={() => {
+						setName('');
+						window.location.reload();
+					}}
+				>
+					reset name
 				</button>
 			</div>
-			<Leaderboards setGameOver={(status) => setGameOver(status)} gameOver={gameOver} score={score} />
+			<Leaderboards
+				setGameOver={(status) => setGameOver(status)}
+				gameOver={gameOver}
+				gameStarted={gameStarted}
+				score={score}
+				setTitle={setTitle}
+				startGame={startGame}
+			/>
 		</div>
 	);
 };
