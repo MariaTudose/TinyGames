@@ -11,9 +11,11 @@ const overlapsSnake = (newCoords: number[], coords: number[][]) =>
 
 export const getFoodCoords = (coords: number[][]) => {
 	let newCoords: number[];
+	let c = 0;
 	do {
+		c += 1;
 		newCoords = getRandomCoords();
-	} while (overlapsSnake(newCoords, coords));
+	} while (overlapsSnake(newCoords, coords) && c < 1000);
 	return newCoords;
 };
 
