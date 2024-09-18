@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSound } from 'use-sound';
 import cx from 'classnames';
 import {
-	getFoodCoords,
+	getItemCoords,
 	modN,
 	getRandomCoords,
 	getRandomColor,
@@ -77,9 +77,10 @@ const Snake = () => {
 	const [dir, setDir] = useState(Direction.ArrowRight);
 	const [coords, setCoords] = useState([[8, 8]]);
 	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
-	const [goldenCoords, setGoldenCoords, spawnGolden, goldenEl] = useItem(coords, snakeSpeed, 'goldenFood');
-	const [shroomCoords, setShroomCoords, spawnShroom, shroomEl] = useItem(coords, snakeSpeed, 'shroom');
-	const [starCoords, setStarCoords, spawnStar, starEl] = useItem(coords, snakeSpeed, 'star');
+	const [, setPath] = useState<number[][]>([]);
+	const [goldenCoords, setGoldenCoords, spawnGolden, goldenEl] = useItem(coords, snakeSpeed, 'goldenFood', setPath);
+	const [shroomCoords, setShroomCoords, spawnShroom, shroomEl] = useItem(coords, snakeSpeed, 'shroom', setPath);
+	const [starCoords, setStarCoords, spawnStar, starEl] = useItem(coords, snakeSpeed, 'star', setPath);
 
 	// Colors
 	const { value, setItem } = useLocalStorage('color', colors[0]);
@@ -129,7 +130,7 @@ const Snake = () => {
 		if (yPos === appleCoords[0] && xPos === appleCoords[1]) {
 			setSnakeLength((length) => length + 1);
 			setScore((score) => score + 1);
-			setAppleCoords(getFoodCoords(coords));
+			setAppleCoords(getItemCoords(coords));
 			foodAudio();
 		}
 
@@ -302,6 +303,9 @@ const Snake = () => {
 					{goldenEl}
 					{shroomEl}
 					{starEl}
+					{/*path.slice(1, -1).map(([yPos, xPos], i) => (
+						<div key={i} className={cx('snake')} style={{ gridArea: `${yPos} / ${xPos}` }} />
+					))*/}
 				</div>
 				<div className="colorGrid">
 					{colors.map((color) => (

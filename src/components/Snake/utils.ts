@@ -9,7 +9,7 @@ export const modN = (newPos: number) => ((((newPos - 1) % n) + n) % n) + 1;
 const overlapsSnake = (newCoords: number[], coords: number[][]) =>
 	coords.find(([y, x]) => y === newCoords[0] && x === newCoords[1]);
 
-export const getFoodCoords = (coords: number[][]) => {
+export const getItemCoords = (coords: number[][]) => {
 	let newCoords: number[];
 	let c = 0;
 	do {
