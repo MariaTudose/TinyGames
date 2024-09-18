@@ -77,9 +77,9 @@ const Snake = () => {
 	const [dir, setDir] = useState(Direction.ArrowRight);
 	const [coords, setCoords] = useState([[8, 8]]);
 	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
-	const [goldenCoords, setGoldenCoords, spawnGolden] = useItem(coords, snakeSpeed);
-	const [shroomCoords, setShroomCoords, spawnShroom] = useItem(coords, snakeSpeed);
-	const [starCoords, setStarCoords, spawnStar] = useItem(coords, snakeSpeed);
+	const [goldenCoords, setGoldenCoords, spawnGolden, goldenEl] = useItem(coords, snakeSpeed, 'goldenFood');
+	const [shroomCoords, setShroomCoords, spawnShroom, shroomEl] = useItem(coords, snakeSpeed, 'shroom');
+	const [starCoords, setStarCoords, spawnStar, starEl] = useItem(coords, snakeSpeed, 'star');
 
 	// Colors
 	const { value, setItem } = useLocalStorage('color', colors[0]);
@@ -299,18 +299,9 @@ const Snake = () => {
 						/>
 					))}
 					<div className="food" style={{ gridArea: `${appleCoords[0]} / ${appleCoords[1]}` }}></div>
-					<div
-						className={`goldenFood ${goldenCoords[0] === 0 && 'hidden'}`}
-						style={{ gridArea: `${goldenCoords[0]} / ${goldenCoords[1]}` }}
-					/>
-					<div
-						className={`shroom ${shroomCoords[0] === 0 && 'hidden'}`}
-						style={{ gridArea: `${shroomCoords[0]} / ${shroomCoords[1]}` }}
-					/>
-					<div
-						className={`star ${starCoords[0] === 0 && 'hidden'}`}
-						style={{ gridArea: `${starCoords[0]} / ${starCoords[1]}` }}
-					/>
+					{goldenEl}
+					{shroomEl}
+					{starEl}
 				</div>
 				<div className="colorGrid">
 					{colors.map((color) => (

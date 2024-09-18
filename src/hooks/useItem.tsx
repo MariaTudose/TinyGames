@@ -1,11 +1,8 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 
 import { getFoodCoords } from '../components/Snake/utils';
 
-export const useItem = (
-	snakeCoords: number[][],
-	snakeSpeed: number
-): [number[], Dispatch<SetStateAction<number[]>>, () => void] => {
+export const useItem = (snakeCoords: number[][], snakeSpeed: number, className: string) => {
 	const [coords, setCoords] = useState([0, 0]);
 
 	const spawnItem = () => {
@@ -18,5 +15,12 @@ export const useItem = (
 		}, time);
 	};
 
-	return [coords, setCoords, spawnItem];
+	const element = (
+		<div
+			className={`${className} ${coords[0] === 0 && 'hidden'}`}
+			style={{ gridArea: `${coords[0]} / ${coords[1]}` }}
+		/>
+	);
+
+	return [coords, setCoords, spawnItem, element] as const;
 };
