@@ -16,15 +16,15 @@ interface LeaderboardProps {
 	gameStarted: boolean;
 	score: number;
 	setTitle: (title: string) => void;
-	startGame: () => void;
+	play: () => void;
 }
 
-const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, startGame }: LeaderboardProps) => {
+const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, play }: LeaderboardProps) => {
 	const [name, setName] = useState('');
 	const [showNameInput, setShowNameInput] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [leaderBoard, setLeaderBoard] = useState<Score[]>([]);
-	const { value: savedName, setItem } = useLocalStorage('name', '');
+	const [savedName, setSavedName] = useLocalStorage('name', '');
 
 	const filterScores = (leaderBoard: Score[]) => {
 		const newLeaderBoard = Object.values(
@@ -42,7 +42,7 @@ const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, star
 			const { key } = e;
 			if (key === ' ' && !gameStarted && !showNameInput) {
 				e.preventDefault();
-				startGame();
+				play();
 				setTitle('');
 			}
 			if (key === 'Escape') {
@@ -53,7 +53,8 @@ const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, star
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [gameStarted, setTitle, showNameInput, startGame]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	// Populate leaderboard
 	useEffect(() => {
@@ -111,13 +112,14 @@ const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, star
 		} else if (gameOver) {
 			setTitle('Game over');
 		}
-	}, [gameOver, leaderBoard, savedName, score, setGameOver, setTitle, updateScores]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [gameOver]);
 
 	const enterName = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const trimmedName = name.trim();
 		if (trimmedName.length > 0 && trimmedName.length <= 10) {
-			setItem(name);
+			setSavedName(name);
 			updateScores(name);
 			setShowNameInput(false);
 		}

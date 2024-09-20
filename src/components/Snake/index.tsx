@@ -65,7 +65,8 @@ const Snake = () => {
 	const [gameStarted, setGameStarted] = useState(false);
 	const [score, setScore] = useState(0);
 	const [timeStarted, setTimeStarted] = useState<Date>(new Date());
-	const { setItem: setName } = useLocalStorage('name', '');
+	const [, setName] = useLocalStorage('name', '');
+	const [debug] = useLocalStorage('debug', false);
 
 	// Snake properties
 	const [snakeLength, setSnakeLength] = useState(1);
@@ -77,31 +78,31 @@ const Snake = () => {
 	const [dir, setDir] = useState(Direction.ArrowRight);
 	const [coords, setCoords] = useState([[8, 8]]);
 	const [appleCoords, setAppleCoords] = useState(getRandomCoords());
-	const [, setPath] = useState<number[][]>([]);
+	const [path, setPath] = useState<number[][]>([]);
 	const [goldenCoords, setGoldenCoords, spawnGolden, goldenEl] = useItem(coords, snakeSpeed, 'goldenFood', setPath);
 	const [shroomCoords, setShroomCoords, spawnShroom, shroomEl] = useItem(coords, snakeSpeed, 'shroom', setPath);
 	const [starCoords, setStarCoords, spawnStar, starEl] = useItem(coords, snakeSpeed, 'star', setPath);
 
 	// Colors
-	const { value, setItem } = useLocalStorage('color', colors[0]);
+	const [color, setColor] = useLocalStorage('color', colors[0]);
 	const [snakeColor, setSnakeColor] = useState(colors[0]);
 	const [colorsSwapped, setColorsSwapped] = useState(false);
 
 	// Sound
-	const { value: muted, setItem: setMuted } = useLocalStorage('muted', false);
+	const [muted, setMuted] = useLocalStorage('muted', false);
 	const [poisonAudio] = useSound(poison, { volume: muted ? 0 : 1 });
 	const [goldenAudio] = useSound(golden, { volume: muted ? 0 : 1 });
 	const [foodAudio] = useSound(crunch, { playbackRate: 1 + Math.random(), volume: muted ? 0 : 1 });
 	const [playStar] = useSound(star, { volume: muted ? 0 : 0.15 });
 
 	const selectColor = (color: string) => {
-		setItem(color);
+		setColor(color);
 		setSnakeColor(color);
 	};
 
 	useEffect(() => {
-		if (value) setSnakeColor(value);
-	}, [value]);
+		if (color) setSnakeColor(color);
+	}, [color]);
 
 	useEffect(() => {
 		// Speed up snake
@@ -253,8 +254,7 @@ const Snake = () => {
 			return () => clearInterval(intervalRef.current);
 		}
 	}, [handleMove, gameStarted, snakeSpeed, dir]);
-
-	const startGame = () => {
+	const play = () => {
 		setScore(0);
 		setTitle('');
 		setSnakeLength(1);
@@ -303,9 +303,12 @@ const Snake = () => {
 					{goldenEl}
 					{shroomEl}
 					{starEl}
-					{/*path.slice(1, -1).map(([yPos, xPos], i) => (
-						<div key={i} className={cx('snake')} style={{ gridArea: `${yPos} / ${xPos}` }} />
-					))*/}
+					{debug &&
+						path
+							.slice(1, -1)
+							.map(([yPos, xPos], i) => (
+								<div key={i} className={cx('snake')} style={{ gridArea: `${yPos} / ${xPos}` }} />
+							))}
 				</div>
 				<div className="colorGrid">
 					{colors.map((color) => (
@@ -328,7 +331,7 @@ const Snake = () => {
 				</div>
 			</div>
 			<div>
-				<button className="startButton" onClick={startGame}>
+				<button className="startButton" onClick={play}>
 					start
 				</button>
 				<button
@@ -346,7 +349,7 @@ const Snake = () => {
 				gameStarted={gameStarted}
 				score={score}
 				setTitle={setTitle}
-				startGame={startGame}
+				play={play}
 			/>
 		</div>
 	);
