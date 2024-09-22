@@ -83,6 +83,36 @@
 	&.hasBottomNeighbor { border-bottom: unset }
 }
 
+.food {
+	background-image: url(../../static/apple.svg);
+	background-size: contain;
+}
+
+.goldenFood {
+	background-image: url(../../static/goldenApple.svg);
+	background-size: contain;
+	&.hidden {
+		visibility: hidden;
+	}
+}
+
+.shroom {
+	background-image: url(../../static/shroom.svg);
+	background-size: contain;
+	&.hidden {
+		visibility: hidden;
+	}
+}
+
+.star {
+	background-image: url(../../static/star.png);
+	background-size: contain;
+	&.hidden {
+		visibility: hidden;
+	}
+} 
+
+
 .colorGrid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
