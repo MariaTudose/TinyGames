@@ -4,6 +4,8 @@ import { isSameWeek } from 'date-fns';
 import { isSameWeekAsToday } from './utils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
+import './Leaderboard.scss';
+
 export type Score = {
 	name: string;
 	score: number;
