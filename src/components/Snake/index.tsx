@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSound } from 'use-sound';
 import cx from 'classnames';
+
+import { useItem, useLocalStorage } from '../../hooks';
+import poison from '../../static/sounds/poisoned.mp3';
+import crunch from '../../static/sounds/crunch.mp3';
+import golden from '../../static/sounds/golden.wav';
+import star from '../../static/sounds/star.mp3';
+
 import {
 	getItemCoords,
 	modN,
@@ -10,13 +17,9 @@ import {
 	blinkInterval,
 	getTimeDiff,
 } from './utils';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+
+import ColorGrid from './ColorGrid';
 import Leaderboards from './Leaderboard';
-import poison from '../../static/sounds/poisoned.mp3';
-import crunch from '../../static/sounds/crunch.mp3';
-import golden from '../../static/sounds/golden.wav';
-import star from '../../static/sounds/star.mp3';
-import { useItem } from '../../hooks/useItem';
 
 import './styles.scss';
 
@@ -253,6 +256,7 @@ const Snake = () => {
 			return () => clearInterval(intervalRef.current);
 		}
 	}, [handleMove, gameStarted, snakeSpeed, dir]);
+
 	const play = () => {
 		setScore(0);
 		setSnakeLength(1);
@@ -310,25 +314,13 @@ const Snake = () => {
 						<h1>{gameStatus}</h1>
 					</div>
 				</div>
-				<div className="colorGrid">
-					{colors.map((color) => (
-						<div
-							key={color}
-							style={{ backgroundColor: color }}
-							className={color}
-							onClick={() => selectColor(color)}
-						></div>
-					))}
-					<label className="colorPicker">
-						<input type="color" value={snakeColor} onChange={(e) => setSnakeColor(e.target.value)} />
-					</label>
-					<div onClick={() => setColorsSwapped((swap) => !swap)} className="reverse">
-						{'\u21BB'}
-					</div>
-					<div onClick={() => setMuted(!muted)} className="sound">
-						{muted ? '🔇' : '🔊'}
-					</div>
-				</div>
+				<ColorGrid
+					snakeColor={snakeColor}
+					selectColor={selectColor}
+					setColorsSwapped={setColorsSwapped}
+					muted={!!muted}
+					setMuted={setMuted}
+				/>
 			</div>
 			<Leaderboards gameOver={gameOver} gameStarted={gameStarted} score={score} play={play} setStatus={setGameStatus} />
 		</div>
