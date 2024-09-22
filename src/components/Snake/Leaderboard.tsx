@@ -11,15 +11,14 @@ export type Score = {
 };
 
 interface LeaderboardProps {
-	setGameOver: (gameOver: boolean) => void;
 	gameOver: boolean;
 	gameStarted: boolean;
 	score: number;
-	setTitle: (title: string) => void;
+	setStatus: (title: string) => void;
 	play: () => void;
 }
 
-const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, play }: LeaderboardProps) => {
+const Leaderboard = ({ gameOver, gameStarted, score, setStatus, play }: LeaderboardProps) => {
 	const [name, setName] = useState('');
 	const [showNameInput, setShowNameInput] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +42,7 @@ const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, play
 			if (key === ' ' && !gameStarted && !showNameInput) {
 				e.preventDefault();
 				play();
-				setTitle('');
+				setStatus('');
 			}
 			if (key === 'Escape') {
 				setShowNameInput(false);
@@ -105,12 +104,11 @@ const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, play
 		};
 
 		if (gameOver && newHighScore()) {
-			setTitle('New high score!!');
-			setGameOver(false);
+			setStatus('High score');
 			if (savedName) updateScores(savedName);
 			else setShowNameInput(true);
 		} else if (gameOver) {
-			setTitle('Game over');
+			setStatus('Game over');
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [gameOver]);
@@ -127,33 +125,45 @@ const Leaderboard = ({ setGameOver, gameOver, gameStarted, score, setTitle, play
 
 	return (
 		<div className="aside">
-			<h2>Top 10 this week</h2>
-			<table>
-				<tbody>
-					{filterScores(leaderBoard.filter(isSameWeekAsToday)).map((score, i) => (
-						<tr key={i} className={score.name === savedName ? 'player' : ''}>
-							<td>{score.name}</td>
-							<td>{score.score}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-			<br />
-			<h2>Top 10 all time</h2>
-			<table>
-				<tbody>
-					{filterScores(leaderBoard).map((score, i) => (
-						<tr key={i} className={score.name === savedName ? 'player' : ''}>
-							<td>{score.name}</td>
-							<td>{score.score}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
+			<div className="leaderboard">
+				<div>
+					<h2>Top 10 week</h2>
+					<table>
+						<tbody>
+							{filterScores(leaderBoard.filter(isSameWeekAsToday)).map((score, i) => (
+								<tr key={i} className={score.name === savedName ? 'player' : ''}>
+									<td>{score.name}</td>
+									<td>{score.score}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				<div>
+					<h2>Top 10 all time</h2>
+					<table>
+						<tbody>
+							{filterScores(leaderBoard).map((score, i) => (
+								<tr key={i} className={score.name === savedName ? 'player' : ''}>
+									<td>{score.name}</td>
+									<td>{score.score}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<button
+				onClick={() => {
+					setName('');
+					window.location.reload();
+				}}
+			>
+				reset name
+			</button>
 			<form className={`name ${showNameInput && 'visible'}`} onSubmit={enterName}>
-				<h3>New high score!</h3>
 				<label>
-					Name:
+					Enter name:
 					<input
 						autoComplete="off"
 						ref={inputRef}

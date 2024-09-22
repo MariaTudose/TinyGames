@@ -60,12 +60,11 @@ const Snake = () => {
 	const [nextItem, setNextItem] = useState(SpecialItem.Star);
 
 	// Game status
-	const [title, setTitle] = useState('');
+	const [gameStatus, setGameStatus] = useState('');
 	const [gameOver, setGameOver] = useState(false);
 	const [gameStarted, setGameStarted] = useState(false);
 	const [score, setScore] = useState(0);
 	const [timeStarted, setTimeStarted] = useState<Date>(new Date());
-	const [, setName] = useLocalStorage('name', '');
 	const [debug] = useLocalStorage('debug', false);
 
 	// Snake properties
@@ -256,7 +255,6 @@ const Snake = () => {
 	}, [handleMove, gameStarted, snakeSpeed, dir]);
 	const play = () => {
 		setScore(0);
-		setTitle('');
 		setSnakeLength(1);
 		setGameOver(false);
 		setCoords([[8, 8]]);
@@ -268,7 +266,6 @@ const Snake = () => {
 
 	return (
 		<div className="snakeContainer">
-			<h1 className="snakeHeader">{title}</h1>
 			<div className="stats">
 				<h4>{`Score: ${score}`}</h4>
 				<h4>{`Length: ${snakeLength}`}</h4>
@@ -309,6 +306,9 @@ const Snake = () => {
 							.map(([yPos, xPos], i) => (
 								<div key={i} className={cx('snake')} style={{ gridArea: `${yPos} / ${xPos}` }} />
 							))}
+					<div className={`status ${gameOver ? 'visible' : ''}`}>
+						<h1>{gameStatus}</h1>
+					</div>
 				</div>
 				<div className="colorGrid">
 					{colors.map((color) => (
@@ -330,27 +330,7 @@ const Snake = () => {
 					</div>
 				</div>
 			</div>
-			<div>
-				<button className="startButton" onClick={play}>
-					start
-				</button>
-				<button
-					onClick={() => {
-						setName('');
-						window.location.reload();
-					}}
-				>
-					reset name
-				</button>
-			</div>
-			<Leaderboards
-				setGameOver={(status) => setGameOver(status)}
-				gameOver={gameOver}
-				gameStarted={gameStarted}
-				score={score}
-				setTitle={setTitle}
-				play={play}
-			/>
+			<Leaderboards gameOver={gameOver} gameStarted={gameStarted} score={score} play={play} setStatus={setGameStatus} />
 		</div>
 	);
 };
