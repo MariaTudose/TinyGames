@@ -54,8 +54,7 @@ const Leaderboard = ({ gameOver, gameStarted, score, setStatus, play }: Leaderbo
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [gameStarted, play, setStatus, showNameInput]);
 
 	// Populate leaderboard
 	useEffect(() => {
