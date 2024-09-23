@@ -1,7 +1,7 @@
 import { differenceInMinutes, differenceInSeconds, isSameWeek } from 'date-fns';
 import { Score } from './Leaderboard';
 
-export const n = 15;
+export const n = 16;
 export const getRandomPos = () => Math.ceil(Math.random() * n);
 export const getRandomCoords = () => [getRandomPos(), getRandomPos()];
 export const modN = (newPos: number) => ((((newPos - 1) % n) + n) % n) + 1;
