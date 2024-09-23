@@ -160,6 +160,7 @@ const Snake = () => {
 				setPoisoned(false);
 				clearInterval(interval);
 				setSnakeColor(previousColor);
+				setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 60);
 			}, 6000);
 		}
 
