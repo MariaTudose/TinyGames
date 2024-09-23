@@ -45,6 +45,11 @@
 		transition: all 1s;
 		background: rgba(0, 0, 0, 0.1);
 		color: #e3e3e3;
+
+		h1 {
+			padding: 1rem;
+		}
+
 		&.visible {
 			visibility: visible;
 			opacity: 1;
