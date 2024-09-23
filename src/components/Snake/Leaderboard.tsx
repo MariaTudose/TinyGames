@@ -157,7 +157,7 @@ const Leaderboard = ({ gameOver, gameStarted, score, setStatus, play }: Leaderbo
 			</div>
 			<button
 				onClick={() => {
-					setName('');
+					setSavedName('');
 					window.location.reload();
 				}}
 			>
