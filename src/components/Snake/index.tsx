@@ -53,8 +53,9 @@ const opposites: Record<Direction, string> = {
 };
 
 const verticalDir = ['ArrowDown', 'ArrowUp', 'w', 's'];
-const startingSpeed = 300;
-const scale = (Math.log(60) - Math.log(startingSpeed)) / (40 - 1);
+const startingSpeed = 200;
+const maximumSpeed = 60;
+const scale = (Math.log(maximumSpeed) - Math.log(startingSpeed)) / (40 - 1);
 const colors = ['#ffc0cb', '#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#aff4fb', '#accbfd', '#c7bff8'];
 const backgroundColor = '#242424';
 
@@ -109,7 +110,7 @@ const Snake = () => {
 	useEffect(() => {
 		// Speed up snake
 		if (!poisoned) {
-			setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + 60);
+			setSnakeSpeed(Math.exp(Math.log(startingSpeed) + scale * (snakeLength - 1)) + maximumSpeed);
 		}
 
 		// Spawn shroom or star
@@ -139,7 +140,7 @@ const Snake = () => {
 
 		if (yPos === goldenCoords[0] && xPos === goldenCoords[1]) {
 			setSnakeLength((length) => length + 1);
-			setScore((score) => score + 5);
+			setScore((score) => score + 10);
 			setGoldenCoords([0, 0]);
 			goldenAudio();
 		}
@@ -149,7 +150,7 @@ const Snake = () => {
 			setPoisoned(true);
 			setShroomCoords([0, 0]);
 			setSnakeSpeed((snakeSpeed) => snakeSpeed * 1.4);
-			setScore((score) => score + 3);
+			setScore((score) => score + 2);
 			poisonAudio();
 
 			const interval = setInterval(() => {
@@ -168,6 +169,7 @@ const Snake = () => {
 			playStar();
 			setInvincible(true);
 			setStarCoords([0, 0]);
+			setScore((score) => score + 2);
 			const currentColor = snakeColor;
 			const slowBlink = blinkInterval(setSnakeColor, currentColor, 250);
 

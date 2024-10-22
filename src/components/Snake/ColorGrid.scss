@@ -1,4 +1,3 @@
-
 .colorGrid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--snake-grid-size));
@@ -7,22 +6,23 @@
 	right: calc(-1 * var(--snake-grid-size) - 0.25em);
 	width: var(--snake-grid-size);
 	height: calc(var(--snake-grid-size) * var(--snake-grid-amount) + 2px);
-	
+
 	.colorPicker {
 		width: var(--snake-grid-size);
 		height: var(--snake-grid-size);
 		background: linear-gradient(in hsl longer hue 90deg, #4368f8 0 0);
+
 		input {
 			visibility: hidden;
 		}
 	}
-	
+
 	.reverse {
 		cursor: pointer;
-	}	
-	
+	}
+
 	.sound {
-		grid-area: 16 / 1;
+		grid-area: 14 / 1;
 		cursor: pointer;
-	}	
+	}
 }

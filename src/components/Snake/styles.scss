@@ -59,8 +59,10 @@
 
 .snake {
 	border: 1px solid rgba(0, 0, 0, 0.25);
+
 	&.head {
 		position: relative;
+
 		&::after {
 			content: "";
 			position: absolute;
@@ -96,6 +98,7 @@
 .goldenFood {
 	background-image: url(../../static/goldenApple.svg);
 	background-size: contain;
+
 	&.hidden {
 		visibility: hidden;
 	}
@@ -104,6 +107,7 @@
 .shroom {
 	background-image: url(../../static/shroom.svg);
 	background-size: contain;
+
 	&.hidden {
 		visibility: hidden;
 	}
@@ -112,8 +116,8 @@
 .star {
 	background-image: url(../../static/star.png);
 	background-size: contain;
+
 	&.hidden {
 		visibility: hidden;
 	}
-} 
-
+}
